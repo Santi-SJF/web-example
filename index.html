@@ -3,772 +3,368 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tesis de Inversión: Fiserv (FISV) | Análisis Financiero Interactivo</title>
-    
-    <!-- Tailwind CSS -->
+    <title>Dashboard Financiero - Terminal Estratégica</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Configuration & Styles -->
-    <script>
-        tailwind.config = {
-            theme: {
-                extend: {
-                    colors: {
-                        brand: {
-                            50: '#FBF8F3', // Warm neutral background
-                            100: '#F5EFE6',
-                            200: '#EADBC8',
-                            300: '#DCC3A3',
-                            500: '#9F8364', // Primary Accent (Warm Clay/Bronze)
-                            700: '#5C4B37', // Dark Text
-                            800: '#3E3224',
-                            900: '#1F1912',
-                        },
-                        ui: {
-                            success: '#4F772D', // Muted Green
-                            danger: '#9A3A3A',  // Muted Red
-                            neutral: '#F3F4F6'
-                        }
-                    },
-                    fontFamily: {
-                        sans: ['Outfit', 'sans-serif'],
-                    }
-                }
-            }
-        }
-    </script>
-
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
     <style>
-        /* Custom Utilities */
         body {
-            background-color: #FBF8F3; /* Warm neutral base */
-            color: #3E3224;
-        }
-        
-        .glass-panel {
-            background: rgba(255, 255, 255, 0.7);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.5);
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            font-family: 'Inter', sans-serif;
+            background-color: #0f172a;
+            color: #f1f5f9;
+            overflow-x: hidden;
         }
 
-        .chart-container {
-            position: relative;
-            width: 100%;
-            max-width: 100%;
-            height: 350px; 
-            max-height: 400px;
+        /* Tarjetas con efecto cristal adaptativo */
+        .card-glass {
+            background-color: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            height: 100%;
         }
 
-        /* Smooth Scrolling */
-        html {
-            scroll-behavior: smooth;
+        .card-glass:hover {
+            transform: translateY(-5px);
+            background-color: rgba(255, 255, 255, 0.06);
+            border-color: #fb923c; /* orange-400 */
+            box-shadow: 0 20px 40px -15px rgba(0, 0, 0, 0.6);
         }
 
-        /* Hide Scrollbar for clean UI in nav */
-        .no-scrollbar::-webkit-scrollbar {
+        /* Zona de fecha: Integrada y minimalista */
+        .date-container {
+            background-color: rgba(0, 0, 0, 0.15);
+            color: rgba(255, 255, 255, 0.9);
+            border-left: 3px solid rgba(255, 255, 255, 0.3);
+            padding: 0.25rem 0.75rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+            letter-spacing: 0.025em;
+            display: flex;
+            align-items: center;
+            border-radius: 0 4px 4px 0;
+        }
+
+        /* Transiciones de sección */
+        .section-content {
             display: none;
+            animation: fadeInPage 0.6s ease-out;
         }
-        .no-scrollbar {
-            -ms-overflow-style: none;
-            scrollbar-width: none;
+
+        .section-content.active {
+            display: block;
+        }
+
+        @keyframes fadeInPage {
+            from { opacity: 0; transform: scale(0.99); }
+            to { opacity: 1; transform: scale(1); }
+        }
+
+        .nav-link.active {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-bottom: 3px solid #fdba74; /* orange-300 */
         }
     </style>
 </head>
-<body class="antialiased font-sans">
+<body class="flex flex-col min-h-screen">
 
-    <!-- REQUIRED PLACEHOLDERS -->
-    <!-- Chosen Palette: Warm Neutrals & Earthy Tones (Stone/Bronze/Clay) for a stable, financial aesthetic. -->
-    
-    <!-- Application Structure Plan: 
-         1. **Header/Dashboard Summary**: Instant view of the thesis (Buy/Hold/Sell) and live-simulated metrics.
-         2. **Navigation**: Sticky top bar to jump between analytical pillars (Business, Financials, Peers, Future).
-         3. **Business Model (The Engine)**: Interactive cards explaining Merchant Acceptance vs. Fintech.
-         4. **Financial Deep Dive**: Dynamic Chart.js visualizations for Revenue/Margins and Deleveraging (debt reduction is key for FISV).
-         5. **Management & Strategy**: Qualitative analysis of Frank Bisignano's performance and capital allocation.
-         6. **Valuation & Scenarios**: Interactive "Price Calculator" where users toggle Bull/Bear cases to see impact on price targets.
-         7. **Risks**: Grid layout identifying key threats.
-         8. **Conclusion**: Synthesis of the investment opportunity.
-         
-         WHY: This structure moves from high-level understanding to deep quantitative analysis, ending with actionable scenarios, mirroring a professional analyst's workflow.
-    -->
-
-    <!-- Visualization & Content Choices:
-         1. **Revenue Mix (Donut Chart)**: Goal: Show diversification. Method: Chart.js. Interaction: Hover for segment details.
-         2. **Financial Trajectory (Bar/Line Combo)**: Goal: Show growth + margin expansion. Method: Chart.js. Interaction: Toggle data visibility.
-         3. **Debt Ladder (Bar Chart)**: Goal: Visualise liquidity/solvency. Method: Chart.js.
-         4. **Peer Comparison (Scatter/Bubble simulated)**: Goal: Relative valuation. Method: Chart.js Bubble.
-         5. **Scenario Modeler (HTML/JS Sliders)**: Goal: Allow user to test assumptions. Method: Vanilla JS DOM manipulation.
-         
-         CONFIRMATION: NO SVG graphics used. NO Mermaid JS used.
-    -->
-
-    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
-
-    <!-- NAVIGATION -->
-    <nav class="sticky top-0 z-50 bg-brand-50/90 backdrop-blur border-b border-brand-200">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-3">
-                    <div class="h-8 w-8 bg-brand-500 rounded-lg flex items-center justify-center text-white font-bold">F</div>
-                    <span class="text-xl font-bold tracking-tight text-brand-900">FISERV <span class="text-brand-500 text-sm font-medium">(FISV)</span></span>
-                </div>
-                <div class="hidden md:flex space-x-8 text-sm font-medium text-brand-700">
-                    <a href="#overview" class="hover:text-brand-500 transition">Visión General</a>
-                    <a href="#business" class="hover:text-brand-500 transition">Negocio</a>
-                    <a href="#financials" class="hover:text-brand-500 transition">Finanzas</a>
-                    <a href="#management" class="hover:text-brand-500 transition">Directiva</a>
-                    <a href="#valuation" class="hover:text-brand-500 transition">Valoración</a>
-                </div>
-                <button onclick="document.getElementById('mobile-menu').classList.toggle('hidden')" class="md:hidden text-brand-700 font-bold text-xl">☰</button>
-            </div>
-        </div>
-        <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-brand-100 p-4 space-y-2 border-b border-brand-200">
-            <a href="#overview" class="block text-brand-800">Visión General</a>
-            <a href="#business" class="block text-brand-800">Negocio</a>
-            <a href="#financials" class="block text-brand-800">Finanzas</a>
-            <a href="#valuation" class="block text-brand-800">Valoración</a>
-        </div>
-    </nav>
-
-    <!-- HERO SECTION -->
-    <header id="overview" class="bg-white py-12 border-b border-brand-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="lg:flex lg:items-start lg:justify-between">
-                <div class="max-w-2xl">
-                    <div class="inline-block px-3 py-1 bg-brand-100 text-brand-800 rounded-full text-xs font-semibold mb-4 tracking-wide">TESIS DE INVERSIÓN: LARGO PLAZO</div>
-                    <h1 class="text-4xl md:text-5xl font-bold text-brand-900 mb-4">El Gigante Silencioso de los Pagos</h1>
-                    <p class="text-lg text-brand-700 leading-relaxed mb-6">
-                        Fiserv (FISV) es la infraestructura invisible detrás de millones de transacciones diarias. Con una posición dominante en el procesamiento de pagos (Merchant Acceptance) y tecnología bancaria, la tesis se centra en la expansión de márgenes, la joya de la corona "Clover" y una agresiva recompra de acciones.
-                    </p>
-                    <div class="flex flex-wrap gap-4">
-                        <div class="px-4 py-2 bg-brand-50 rounded border border-brand-200">
-                            <span class="block text-xs text-brand-500 uppercase font-bold">Recomendación Analista</span>
-                            <span class="text-xl font-bold text-ui-success">SOBREPONDERAR</span>
-                        </div>
-                        <div class="px-4 py-2 bg-brand-50 rounded border border-brand-200">
-                            <span class="block text-xs text-brand-500 uppercase font-bold">Precio Actual (Est.)</span>
-                            <span class="text-xl font-bold text-brand-900">$192.50</span>
-                        </div>
-                        <div class="px-4 py-2 bg-brand-50 rounded border border-brand-200">
-                            <span class="block text-xs text-brand-500 uppercase font-bold">Target Base (2025)</span>
-                            <span class="text-xl font-bold text-brand-900">$215 - $230</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <!-- Key Stats Grid -->
-                <div class="mt-8 lg:mt-0 lg:w-1/3 grid grid-cols-2 gap-4">
-                    <div class="bg-brand-50 p-4 rounded-lg text-center">
-                        <div class="text-2xl font-bold text-brand-800">11-13%</div>
-                        <div class="text-xs text-brand-500 uppercase">Crecimiento EPS (Est)</div>
-                    </div>
-                    <div class="bg-brand-50 p-4 rounded-lg text-center">
-                        <div class="text-2xl font-bold text-brand-800">38%</div>
-                        <div class="text-xs text-brand-500 uppercase">Margen Operativo</div>
-                    </div>
-                    <div class="bg-brand-50 p-4 rounded-lg text-center">
-                        <div class="text-2xl font-bold text-brand-800">14.5x</div>
-                        <div class="text-xs text-brand-500 uppercase">PER Forward</div>
-                    </div>
-                    <div class="bg-brand-50 p-4 rounded-lg text-center">
-                        <div class="text-2xl font-bold text-brand-800">BBB</div>
-                        <div class="text-xs text-brand-500 uppercase">Rating Crediticio</div>
+    <!-- Header Naranja Principal -->
+    <header class="bg-orange-700 text-white shadow-2xl sticky top-0 z-50">
+        <div class="container mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center">
+            <div class="flex items-center">
+                <div class="flex flex-col">
+                    <h1 class="text-xl font-bold tracking-tight uppercase leading-none mb-2">Terminal Estratégica</h1>
+                    <div id="current-date" class="date-container md:inline-flex hidden">
+                        <!-- Fecha automática JS -->
                     </div>
                 </div>
             </div>
+            
+            <nav class="mt-4 md:mt-0">
+                <ul id="main-nav" class="flex space-x-1 text-xs font-bold uppercase tracking-wider">
+                    <li><button onclick="showSection('macroeconomia')" class="nav-link px-4 py-3 hover:bg-orange-600 transition active" data-section="macroeconomia">Macro</button></li>
+                    <li><button onclick="showSection('noticias')" class="nav-link px-4 py-3 hover:bg-orange-600 transition" data-section="noticias">Noticias</button></li>
+                    <li><button onclick="showSection('analisis')" class="nav-link px-4 py-3 hover:bg-orange-600 transition" data-section="analisis">Análisis</button></li>
+                    <li><button onclick="showSection('empresas')" class="nav-link px-4 py-3 hover:bg-orange-600 transition" data-section="empresas">Empresas</button></li>
+                </ul>
+            </nav>
         </div>
     </header>
 
-    <!-- MAIN CONTENT -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-16">
-
-        <!-- SECTION 1: BUSINESS MODEL -->
-        <section id="business">
-            <div class="mb-6">
-                <h2 class="text-3xl font-bold text-brand-900">¿Qué hace Fiserv y cómo gana dinero?</h2>
-                <p class="mt-2 text-brand-700">Fiserv opera en un duopolio de facto en muchas áreas. Su negocio se divide en dos segmentos principales que actúan como motores complementarios.</p>
-            </div>
-
-            <div class="grid md:grid-cols-2 gap-8">
-                <!-- Segment 1 -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-brand-200 hover:border-brand-500 transition-colors">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold text-brand-800">🏢 Merchant Acceptance (Aceptación)</h3>
-                        <span class="bg-brand-100 text-brand-800 text-xs px-2 py-1 rounded-full font-bold">~50% Ingresos</span>
-                    </div>
-                    <p class="text-sm text-brand-600 mb-4">
-                        Proporciona a los comercios la capacidad de aceptar pagos (TPV, e-commerce). Aquí se encuentra <strong>Clover</strong>, su sistema de punto de venta basado en la nube que compite con Toast y Square.
-                    </p>
-                    <ul class="text-sm space-y-2 text-brand-700">
-                        <li class="flex items-start"><span class="mr-2 text-brand-500">➤</span> Gana una pequeña comisión por cada transacción (Take rate).</li>
-                        <li class="flex items-start"><span class="mr-2 text-brand-500">➤</span> Venta de Hardware (Clover devices) y Software SaaS.</li>
-                        <li class="flex items-start"><span class="mr-2 text-brand-500">➤</span> <strong>Carat:</strong> Solución omnicanal para grandes empresas globales.</li>
-                    </ul>
+    <main class="flex-grow">
+        
+        <!-- SECCIÓN: MACROECONOMÍA -->
+        <section id="macroeconomia" class="section-content active bg-[#0f172a] min-h-screen py-20">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center mb-12">
+                    <div class="w-2 h-10 bg-orange-500 rounded-full mr-5"></div>
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter">Macroeconomía</h2>
                 </div>
 
-                <!-- Segment 2 -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-brand-200 hover:border-brand-500 transition-colors">
-                    <div class="flex items-center justify-between mb-4">
-                        <h3 class="text-xl font-bold text-brand-800">🏦 Financial Tech (Fintech)</h3>
-                        <span class="bg-brand-100 text-brand-800 text-xs px-2 py-1 rounded-full font-bold">~50% Ingresos</span>
-                    </div>
-                    <p class="text-sm text-brand-600 mb-4">
-                        El "sistema operativo" de los bancos. Proporciona el Core Banking, procesamiento de cuentas, banca digital y redes de pagos como Zelle (a través de conexiones).
-                    </p>
-                    <ul class="text-sm space-y-2 text-brand-700">
-                        <li class="flex items-start"><span class="mr-2 text-brand-500">➤</span> Contratos a largo plazo (3-5 años) con alta fidelidad (High switching costs).</li>
-                        <li class="flex items-start"><span class="mr-2 text-brand-500">➤</span> Ingresos recurrentes y predecibles.</li>
-                        <li class="flex items-start"><span class="mr-2 text-brand-500">➤</span> Gana por cuenta procesada y servicios digitales añadidos.</li>
-                    </ul>
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-white uppercase tracking-tight">Macro Data Sources</h3>
+                    <p class="text-orange-400/70 text-[10px] font-bold uppercase tracking-widest">Fuentes de Datos Macroeconómicos</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <a href="https://fred.stlouisfed.org/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">FRED</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Federal Reserve Economic Data</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Más de 800,000 series temporales internacionales de la Reserva Federal.</p>
+                    </a>
+                    <a href="https://www.longtermtrends.net/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">Longtermtrends</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Tendencias Históricas</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Visualización de ratios históricos y tendencias macro de largo plazo.</p>
+                    </a>
+                    <a href="https://www.gurufocus.com/yield_curve.php" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">Yield Curve Monitor</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Curva de Tipos</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Monitor interactivo de diferenciales de tipos para predecir ciclos.</p>
+                    </a>
+                    <a href="https://tradingeconomics.com/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">Trading Economics</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Indicadores Globales</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Datos precisos y proyecciones para 196 países.</p>
+                    </a>
+                    <a href="https://www.imf.org/en/Data" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">IMF Data</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Fondo Monetario Int.</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Finanzas globales y World Economic Outlook.</p>
+                    </a>
+                    <a href="https://data.oecd.org/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">OECD Data</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">OCDE Estadísticas</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Datos comparativos de alta calidad sobre economías desarrolladas.</p>
+                    </a>
+                    <a href="https://data.worldbank.org/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">World Bank</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Banco Mundial</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Acceso libre a datos sobre desarrollo global.</p>
+                    </a>
+                    <a href="https://ec.europa.eu/eurostat/data/database" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">Eurostat</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Unión Europea</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">Base oficial para la Eurozona y los 27 países miembros.</p>
+                    </a>
+                    <a href="https://www.ine.es/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-orange-400 mb-3">INE España</h4>
+                        <p class="text-slate-500 text-[10px] font-bold uppercase tracking-widest mb-2">Estadística Nacional</p>
+                        <p class="text-slate-400 text-sm leading-relaxed">IPC, EPA y PIB de la economía española.</p>
+                    </a>
                 </div>
             </div>
+        </section>
 
-            <!-- Revenue Mix Chart -->
-            <div class="mt-8 bg-white p-6 rounded-xl shadow-sm border border-brand-200">
-                <div class="flex flex-col md:flex-row items-center gap-8">
-                    <div class="w-full md:w-1/3">
-                        <h4 class="font-bold text-brand-900 mb-2">Diversificación de Ingresos (2024 Est.)</h4>
-                        <p class="text-sm text-brand-600">
-                            La mezcla está equilibrada. Mientras que <strong>Acceptance</strong> ofrece mayor crecimiento gracias a la digitalización del efectivo, <strong>Fintech</strong> ofrece estabilidad y flujo de caja (Cash Cow) para financiar adquisiciones y recompras.
-                        </p>
+        <!-- SECCIÓN: NOTICIAS -->
+        <section id="noticias" class="section-content bg-[#1c1917] min-h-screen py-20">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center mb-6">
+                    <div class="w-2 h-10 bg-orange-600 rounded-full mr-5"></div>
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter">Noticias</h2>
+                </div>
+
+                <!-- Fuentes Gratuitas -->
+                <div class="mb-16">
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-white uppercase tracking-tight">Free Sources</h3>
+                        <p class="text-orange-500/70 text-[10px] font-bold uppercase tracking-widest">Fuentes Gratuitas</p>
                     </div>
-                    <div class="w-full md:w-2/3 chart-container h-64">
-                        <canvas id="revenueMixChart"></canvas>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <a href="https://www.google.com/finance/" target="_blank" class="group block p-6 rounded-2xl card-glass">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Google Finance</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Cotizaciones en tiempo real y noticias agregadas.</p>
+                        </a>
+                        <a href="https://finance.yahoo.com/" target="_blank" class="group block p-6 rounded-2xl card-glass">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Yahoo Finance</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Análisis fundamental y carteras globales.</p>
+                        </a>
+                        <a href="https://es.investing.com/" target="_blank" class="group block p-6 rounded-2xl card-glass">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Investing.com</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Calendario económico y cotizaciones técnicas.</p>
+                        </a>
+                        <a href="https://www.eleconomista.es/" target="_blank" class="group block p-6 rounded-2xl card-glass">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">El Economista</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Prensa financiera líder en España.</p>
+                        </a>
+                        <a href="https://www.reuters.com/business/" target="_blank" class="group block p-6 rounded-2xl card-glass">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Reuters</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Agencia de noticias global de alta fiabilidad.</p>
+                        </a>
+                        <a href="https://www.cnbc.com/world/" target="_blank" class="group block p-6 rounded-2xl card-glass">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">CNBC World</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Noticias de última hora sobre mercados globales.</p>
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Fuentes de Pago -->
+                <div>
+                    <div class="mb-6">
+                        <h3 class="text-xl font-bold text-white uppercase tracking-tight">Paid Sources</h3>
+                        <p class="text-orange-500/70 text-[10px] font-bold uppercase tracking-widest">Fuentes de Pago</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <a href="https://seekingalpha.com/" target="_blank" class="group block p-6 rounded-2xl card-glass border-l-4 border-orange-500/30">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Seeking Alpha</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Análisis de inversores y datos premium.</p>
+                        </a>
+                        <a href="https://www.ft.com/" target="_blank" class="group block p-6 rounded-2xl card-glass border-l-4 border-orange-500/30">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Financial Times</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Análisis de élite y cobertura global.</p>
+                        </a>
+                        <a href="https://www.wsj.com/" target="_blank" class="group block p-6 rounded-2xl card-glass border-l-4 border-orange-500/30">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Wall Street Journal</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Referente financiero de Estados Unidos.</p>
+                        </a>
+                        <a href="https://www.bloomberg.com/" target="_blank" class="group block p-6 rounded-2xl card-glass border-l-4 border-orange-500/30">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Bloomberg</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Información crítica y terminal digital.</p>
+                        </a>
+                        <a href="https://www.expansion.com/" target="_blank" class="group block p-6 rounded-2xl card-glass border-l-4 border-orange-500/30">
+                            <h4 class="text-lg font-bold text-white group-hover:text-orange-400 mb-2">Expansión</h4>
+                            <p class="text-stone-400 text-xs leading-relaxed">Noticias económicas y empresariales en España.</p>
+                        </a>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- SECTION 2: FINANCIALS -->
-        <section id="financials" class="bg-brand-50/50 p-6 rounded-2xl border border-brand-200">
-            <div class="mb-8">
-                <h2 class="text-3xl font-bold text-brand-900">Análisis Financiero y Fundamental</h2>
-                <p class="mt-2 text-brand-700">Evaluación de la salud financiera, deuda y capacidad de generación de valor.</p>
-            </div>
+        <!-- SECCIÓN: ANÁLISIS -->
+        <section id="analisis" class="section-content bg-[#2d1616] min-h-screen py-20">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center mb-12">
+                    <div class="w-2 h-10 bg-red-800 rounded-full mr-5"></div>
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter">Análisis</h2>
+                </div>
 
-            <!-- Financial Analysis Grid -->
-            <div class="grid lg:grid-cols-2 gap-8 mb-8">
+                <div class="mb-6">
+                    <h3 class="text-xl font-bold text-white uppercase tracking-tight">Analytical Tools</h3>
+                    <p class="text-red-400/70 text-[10px] font-bold uppercase tracking-widest">Herramientas de Análisis</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <a href="https://www.tradingview.com/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-red-400 mb-3">TradingView</h4>
+                        <p class="text-red-100/40 text-sm leading-relaxed">Gráficos avanzados, análisis técnico y red social.</p>
+                    </a>
+                    <a href="https://www.koyfin.com/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-red-400 mb-3">Koyfin</h4>
+                        <p class="text-red-100/40 text-sm leading-relaxed">Datos de mercado profesional y dashboards.</p>
+                    </a>
+                    <a href="https://tikr.com/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-red-400 mb-3">Tikr Terminal</h4>
+                        <p class="text-red-100/40 text-sm leading-relaxed">Fundamental global y estimaciones históricas.</p>
+                    </a>
+                    <a href="https://finviz.com/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-red-400 mb-3">Finviz</h4>
+                        <p class="text-red-100/40 text-sm leading-relaxed">Mapas de calor, screener y visualización rápida.</p>
+                    </a>
+                    <a href="https://simplywall.st/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-red-400 mb-3">Simply Wall St</h4>
+                        <p class="text-red-100/40 text-sm leading-relaxed">Análisis visual intuitivo de fundamentales.</p>
+                    </a>
+                    <a href="https://stockcharts.com/" target="_blank" class="group block p-8 rounded-3xl card-glass">
+                        <h4 class="text-xl font-bold text-white group-hover:text-red-400 mb-3">StockCharts</h4>
+                        <p class="text-red-100/40 text-sm leading-relaxed">Herramientas clásicas de charting técnico.</p>
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- SECCIÓN: EMPRESAS -->
+        <section id="empresas" class="section-content bg-[#1a1625] min-h-screen py-20">
+            <div class="container mx-auto px-6">
+                <div class="flex items-center mb-12">
+                    <div class="w-2 h-10 bg-purple-700 rounded-full mr-5"></div>
+                    <h2 class="text-4xl font-black text-white uppercase tracking-tighter">Sectores Bursátiles</h2>
+                </div>
                 
-                <!-- Growth & Margins -->
-                <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <h3 class="font-bold text-lg text-brand-800 mb-4">Evolución de Ingresos y EBITDA</h3>
-                    <p class="text-sm text-brand-600 mb-4">
-                        Fiserv ha demostrado una capacidad consistente para crecer sus ingresos orgánicos entre un 7-9%. Más importante aún, la <strong>expansión de márgenes</strong> es clave en la tesis. El objetivo es expandir el margen operativo al menos 50 puntos básicos anualmente mediante eficiencias operativas y sinergias post-fusión (First Data).
-                    </p>
-                    <div class="chart-container">
-                        <canvas id="growthChart"></canvas>
-                    </div>
-                </div>
-
-                <!-- Debt & Liquidity -->
-                <div class="bg-white p-6 rounded-xl shadow-sm">
-                    <h3 class="font-bold text-lg text-brand-800 mb-4">Deuda y Liquidez</h3>
-                    <div class="mb-4">
-                        <div class="flex justify-between text-sm mb-1">
-                            <span>Ratio Deuda Neta / EBITDA</span>
-                            <span class="font-bold text-brand-800">~2.7x (Tendencia a la baja)</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="bg-ui-success h-2.5 rounded-full" style="width: 45%"></div>
-                        </div>
-                        <p class="text-xs text-brand-500 mt-1">Objetivo < 3.0x (Cumplido)</p>
-                    </div>
-                    <p class="text-sm text-brand-600 mb-4">
-                        La deuda fue un problema tras la adquisición de First Data en 2019. Sin embargo, la empresa es una máquina de generar Free Cash Flow (FCF). 
-                        <br><br>
-                        <strong>Estrategia de Capital:</strong>
-                        <br>1. Pagar deuda (Deleveraging agresivo ya realizado).
-                        <br>2. Recompra masiva de acciones (Buybacks) que impulsan el EPS.
-                    </p>
-                    <div class="chart-container">
-                        <canvas id="fcfChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- News & Impact -->
-            <div class="bg-white p-6 rounded-xl border-l-4 border-brand-500">
-                <h3 class="font-bold text-lg text-brand-800 mb-3">📰 Noticias Relevantes y Contexto de Valoración</h3>
-                <div class="grid md:grid-cols-3 gap-6">
-                    <div>
-                        <span class="text-xs font-bold text-ui-danger uppercase">El Riesgo Percibido</span>
-                        <p class="text-sm text-brand-600 mt-1">
-                            La acción sufrió en 2022-2023 por el miedo a que las Fintechs disruptivas (Stripe, Adyen) se comieran su mercado. El mercado la valoró como una empresa "legacy" en declive.
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-ui-success uppercase">La Realidad Actual</span>
-                        <p class="text-sm text-brand-600 mt-1">
-                            Fiserv demostró con Clover que puede innovar. La valoración ha comenzado a recuperarse al demostrar que el crecimiento es sostenible y no cíclico.
-                        </p>
-                    </div>
-                    <div>
-                        <span class="text-xs font-bold text-brand-500 uppercase">¿Recuperación?</span>
-                        <p class="text-sm text-brand-600 mt-1">
-                            Sí. La compresión de múltiplos ha terminado. Ahora la acción se mueve impulsada por el crecimiento real de beneficios (EPS) y no solo por expansión de múltiplo.
-                        </p>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 3: MANAGEMENT & PEERS -->
-        <section id="management" class="grid lg:grid-cols-3 gap-8">
-            <!-- Management Analysis -->
-            <div class="lg:col-span-1 space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-brand-200">
-                    <h3 class="text-xl font-bold text-brand-900 mb-4">Directiva: La Era Bisignano</h3>
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="bg-brand-200 h-12 w-12 rounded-full flex items-center justify-center text-xl">👔</div>
-                        <div>
-                            <p class="font-bold text-brand-800">Frank Bisignano</p>
-                            <p class="text-xs text-brand-500">CEO & Chairman</p>
-                        </div>
-                    </div>
-                    <ul class="space-y-3 text-sm text-brand-700">
-                        <li class="pb-2 border-b border-brand-100">
-                            <strong>Cumplimiento:</strong> Ha cumplido sistemáticamente las guías de crecimiento y márgenes desde la fusión.
-                        </li>
-                        <li class="pb-2 border-b border-brand-100">
-                            <strong>Alineación:</strong> La directiva posee acciones significativas. Su compensación está ligada al crecimiento del precio de la acción y TSR.
-                        </li>
-                        <li>
-                            <strong>Estrategia:</strong> Enfoque implacable en la eficiencia. Han integrado sistemas dispares reduciendo costes redundantemente.
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <!-- Comparables -->
-            <div class="lg:col-span-2">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-brand-200 h-full">
-                    <h3 class="text-xl font-bold text-brand-900 mb-4">Comparativa con Pares (Peers)</h3>
-                    <p class="text-sm text-brand-600 mb-4">
-                        Fiserv cotiza con descuento respecto a los "pure players" de alto crecimiento, pero con prima sobre los bancos tradicionales. Su competidor más directo es <strong>Global Payments (GPN)</strong> y <strong>FIS (Fidelity National)</strong>.
-                    </p>
-                    
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-sm text-left text-brand-700">
-                            <thead class="text-xs text-brand-500 uppercase bg-brand-50">
-                                <tr>
-                                    <th class="px-4 py-3">Empresa</th>
-                                    <th class="px-4 py-3">P/E (Fwd)</th>
-                                    <th class="px-4 py-3">Crecimiento Est.</th>
-                                    <th class="px-4 py-3">Ventaja Competitiva (Moat)</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <tr class="border-b border-brand-100 bg-brand-50/50">
-                                    <td class="px-4 py-3 font-bold">Fiserv (FISV)</td>
-                                    <td class="px-4 py-3 font-bold text-brand-900">~14-15x</td>
-                                    <td class="px-4 py-3 text-ui-success">11-13%</td>
-                                    <td class="px-4 py-3">Escala masiva, Clover, Costes de cambio altos (Banca).</td>
-                                </tr>
-                                <tr class="border-b border-brand-100">
-                                    <td class="px-4 py-3">Global Payments (GPN)</td>
-                                    <td class="px-4 py-3">~10-11x</td>
-                                    <td class="px-4 py-3">10-12%</td>
-                                    <td class="px-4 py-3">Fuerte en software vertical, pero menor escala que FISV.</td>
-                                </tr>
-                                <tr class="border-b border-brand-100">
-                                    <td class="px-4 py-3">PayPal (PYPL)</td>
-                                    <td class="px-4 py-3">~13-14x</td>
-                                    <td class="px-4 py-3">8-10%</td>
-                                    <td class="px-4 py-3">Marca consumidor, pero perdiendo cuota de "checkout".</td>
-                                </tr>
-                                <tr>
-                                    <td class="px-4 py-3">Block (Square)</td>
-                                    <td class="px-4 py-3">~25x+</td>
-                                    <td class="px-4 py-3">15%+</td>
-                                    <td class="px-4 py-3">Ecosistema Cash App, innovación rápida.</td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 4: RISKS -->
-        <section class="bg-brand-900 text-brand-50 p-8 rounded-2xl">
-            <h2 class="text-2xl font-bold mb-6 text-brand-200">Matriz de Riesgos</h2>
-            <div class="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
-                <!-- Risk 1 -->
-                <div class="bg-brand-800 p-4 rounded-lg border border-brand-700">
-                    <div class="text-ui-danger text-xl font-bold mb-2">⚠ Competencia</div>
-                    <p class="text-sm text-brand-200">
-                        La commoditización del procesamiento de pagos. Competidores como Adyen o Stripe bajan precios.
-                        <br><br>
-                        <em>Mitigación:</em> Valor añadido mediante Software (SaaS) en Clover, no solo pagos.
-                    </p>
-                </div>
-                <!-- Risk 2 -->
-                <div class="bg-brand-800 p-4 rounded-lg border border-brand-700">
-                    <div class="text-brand-300 text-xl font-bold mb-2">📉 Ciclo Macro</div>
-                    <p class="text-sm text-brand-200">
-                        Una recesión reduce el gasto del consumidor, afectando directamente los ingresos por transacción.
-                        <br><br>
-                        <em>Mitigación:</em> Negocio bancario (Fintech) es anticíclico y muy estable.
-                    </p>
-                </div>
-                <!-- Risk 3 -->
-                <div class="bg-brand-800 p-4 rounded-lg border border-brand-700">
-                    <div class="text-brand-300 text-xl font-bold mb-2">💸 Tipos de Interés</div>
-                    <p class="text-sm text-brand-200">
-                        Tipos altos encarecen la refinanciación de su deuda existente.
-                        <br><br>
-                        <em>Mitigación:</em> La mayoría de su deuda está a tipo fijo y bien escalonada en el tiempo.
-                    </p>
-                </div>
-                <!-- Risk 4 -->
-                <div class="bg-brand-800 p-4 rounded-lg border border-brand-700">
-                    <div class="text-brand-300 text-xl font-bold mb-2">🛡 Regulación</div>
-                    <p class="text-sm text-brand-200">
-                        Escrutinio sobre comisiones de tarjetas de crédito o regulación bancaria.
-                    </p>
-                </div>
-            </div>
-        </section>
-
-        <!-- SECTION 5: VALUATION & SCENARIOS -->
-        <section id="valuation">
-            <div class="mb-8 text-center">
-                <h2 class="text-3xl font-bold text-brand-900">Proyección y Valoración a 12-18 Meses</h2>
-                <p class="mt-2 text-brand-700 max-w-2xl mx-auto">
-                    Interactúa con los escenarios para ver cómo diferentes supuestos de crecimiento y valoración de mercado afectan al precio objetivo.
-                </p>
-            </div>
-
-            <!-- Interactive Valuation Tool -->
-            <div class="bg-white shadow-xl rounded-2xl overflow-hidden border border-brand-200">
-                <div class="flex flex-col md:flex-row">
-                    <!-- Controls -->
-                    <div class="p-8 bg-brand-50 w-full md:w-1/3 border-r border-brand-100">
-                        <h3 class="font-bold text-brand-800 mb-6">Selecciona Escenario</h3>
-                        
-                        <div class="space-y-4">
-                            <button onclick="updateScenario('bear')" id="btn-bear" class="w-full text-left p-4 rounded-lg border transition-all duration-200 hover:bg-white border-brand-200 focus:outline-none opacity-60">
-                                <span class="block font-bold text-ui-danger">🐻 Escenario Pesimista</span>
-                                <span class="text-xs text-brand-500">Recesión, compresión múltiplos</span>
-                            </button>
-
-                            <button onclick="updateScenario('base')" id="btn-base" class="w-full text-left p-4 rounded-lg border-2 border-brand-500 bg-white shadow-md transition-all duration-200 focus:outline-none">
-                                <span class="block font-bold text-brand-800">⚖️ Escenario Base</span>
-                                <span class="text-xs text-brand-500">Ejecución continua, "Soft Landing"</span>
-                            </button>
-
-                            <button onclick="updateScenario('bull')" id="btn-bull" class="w-full text-left p-4 rounded-lg border transition-all duration-200 hover:bg-white border-brand-200 focus:outline-none opacity-60">
-                                <span class="block font-bold text-ui-success">🐂 Escenario Optimista</span>
-                                <span class="text-xs text-brand-500">Aceleración Clover, Expansión PER</span>
-                            </button>
-                        </div>
-                    </div>
-
-                    <!-- Output Display -->
-                    <div class="p-8 w-full md:w-2/3 flex flex-col justify-center items-center text-center relative">
-                        <div id="scenario-description" class="absolute top-6 left-8 right-8 text-sm text-brand-500 italic">
-                            Asumiendo crecimiento de EPS del 14% y mantenimiento del múltiplo actual.
-                        </div>
-
-                        <div class="mb-2 text-brand-500 font-medium uppercase tracking-widest text-sm">Precio Objetivo Proyectado</div>
-                        <div id="target-price" class="text-6xl md:text-7xl font-bold text-brand-900 transition-all duration-500">$215.00</div>
-                        <div id="upside-label" class="mt-4 inline-block px-4 py-2 bg-ui-success/10 text-ui-success rounded-full font-bold text-lg">
-                            +11.5% Upside
-                        </div>
-
-                        <!-- Data details -->
-                        <div class="mt-8 grid grid-cols-3 gap-8 w-full border-t border-brand-100 pt-6">
-                            <div>
-                                <div class="text-xs text-brand-500 uppercase">EPS Estimado (2025)</div>
-                                <div id="eps-val" class="text-xl font-bold text-brand-800">$8.60</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-brand-500 uppercase">Múltiplo PER Aplicado</div>
-                                <div id="pe-val" class="text-xl font-bold text-brand-800">15.0x</div>
-                            </div>
-                            <div>
-                                <div class="text-xs text-brand-500 uppercase">Probabilidad</div>
-                                <div id="prob-val" class="text-xl font-bold text-brand-800">50%</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-
-        <!-- CONCLUSIONS -->
-        <section class="border-t-2 border-brand-200 pt-12">
-            <h2 class="text-3xl font-bold text-brand-900 mb-6">Conclusiones Finales</h2>
-            <div class="bg-brand-50 p-8 rounded-2xl">
-                <div class="grid md:grid-cols-2 gap-8">
-                    <div>
-                        <h4 class="font-bold text-brand-800 mb-2">✅ Puntos Fuertes</h4>
-                        <ul class="list-disc list-inside space-y-2 text-brand-700 text-sm">
-                            <li>Foso económico (Moat) amplio debido a los costes de cambio en el sector bancario.</li>
-                            <li>Clover es una "Killer App" que sigue ganando cuota de mercado en PYMES.</li>
-                            <li>Generación masiva de flujo de caja libre que permite recomprar el 5-7% de las acciones al año.</li>
-                            <li>Valoración razonable (PEG Ratio cercano a 1.2x).</li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="font-bold text-brand-800 mb-2">🎯 Estrategia de Entrada</h4>
-                        <div class="space-y-3">
-                            <div class="flex justify-between items-center border-b border-brand-200 pb-2">
-                                <span class="text-sm text-brand-600">Horquilla Entrada Ideal</span>
-                                <span class="font-bold text-brand-900">$175 - $185</span>
-                            </div>
-                            <div class="flex justify-between items-center border-b border-brand-200 pb-2">
-                                <span class="text-sm text-brand-600">Horquilla Objetivo (12m)</span>
-                                <span class="font-bold text-ui-success">$215 - $230</span>
-                            </div>
-                            <p class="text-xs text-brand-500 mt-2">
-                                <em>Recomendación:</em> Acumular en correcciones. Es una acción "Core" para una cartera que busca crecimiento estable a precio razonable (GARP).
-                            </p>
-                        </div>
-                    </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Energy</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Energía</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Materials</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Materiales</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Industrials</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Industriales</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Consumer Discretionary</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Consumo Discrecional</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Consumer Staples</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Bienes de Consumo</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Health Care</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Salud</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Financials</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Finanzas</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Information Technology</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">IT</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Communication Services</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Comunicación</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Utilities</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Servicios Públicos</p>
+                    </a>
+                    <a href="#" class="group block p-6 rounded-2xl card-glass">
+                        <h3 class="text-lg font-bold text-white group-hover:text-orange-400 transition-colors">Real Estate</h3>
+                        <p class="text-purple-300/60 text-[10px] font-bold uppercase tracking-widest mb-2">Bienes Raíces</p>
+                    </a>
                 </div>
             </div>
         </section>
 
     </main>
 
-    <!-- FOOTER -->
-    <footer class="bg-brand-900 text-brand-300 py-12 mt-12">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p class="text-sm mb-4">Generado por Canvas Create Webapp - Tesis de Inversión Independiente</p>
-            <p class="text-xs text-brand-600">
-                Disclaimer: Este informe es solo para fines informativos y educativos. No constituye asesoramiento financiero. 
-                El autor puede tener posiciones en FISV. Las proyecciones futuras son estimaciones y están sujetas a riesgos de mercado.
-            </p>
+    <footer class="bg-black/40 border-t border-white/5 py-12">
+        <div class="container mx-auto px-6 text-center">
+            <p class="text-orange-600 text-[10px] font-black uppercase tracking-[0.3em] mb-4">Inteligencia de Datos Financieros</p>
+            <p class="text-zinc-600 text-[10px] uppercase">© 2026 Dashboard Premium. Operativa segura.</p>
         </div>
     </footer>
 
-    <!-- JAVASCRIPT LOGIC -->
     <script>
-        // --- 1. DATA STORE ---
-        const financialsData = {
-            years: ['2021', '2022', '2023', '2024E', '2025E'],
-            revenue: [16.2, 17.7, 19.1, 20.5, 22.1], // In Billions
-            ebitda: [6.5, 7.2, 8.1, 9.0, 10.1],      // In Billions
-            debt: [21, 20.5, 19.8, 18.5, 17.0],       // Net Debt trend
-            fcf: [3.5, 3.8, 4.2, 4.8, 5.5]            // Free Cash Flow
-        };
+        function showSection(sectionId) {
+            document.querySelectorAll('.section-content').forEach(section => {
+                section.classList.remove('active');
+            });
+            document.getElementById(sectionId).classList.add('active');
 
-        const revenueMixData = {
-            labels: ['Merchant Acceptance (Comercios)', 'Financial Tech (Bancos)', 'Pagos y Redes'],
-            data: [48, 22, 30], // Simplified mix
-            colors: ['#9F8364', '#5C4B37', '#DCC3A3']
-        };
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+                if(link.getAttribute('data-section') === sectionId) {
+                    link.classList.add('active');
+                }
+            });
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
 
-        const scenarios = {
-            bear: {
-                title: "🐻 Escenario Pesimista",
-                desc: "Recesión económica global, crecimiento de EPS cae al 6%, compresión de múltiplos a 12x.",
-                eps: 7.90,
-                pe: 12.0,
-                prob: "20%",
-                upside: "-2.5% (Riesgo)",
-                upsideColor: "text-ui-danger",
-                bg: "bg-ui-danger/10"
-            },
-            base: {
-                title: "⚖️ Escenario Base",
-                desc: "Crecimiento de EPS del 13-15% impulsado por recompras y Clover. Múltiplo estable en 15x.",
-                eps: 8.60,
-                pe: 15.0,
-                prob: "50%",
-                upside: "+11.5% Upside",
-                upsideColor: "text-ui-success",
-                bg: "bg-ui-success/10"
-            },
-            bull: {
-                title: "🐂 Escenario Optimista",
-                desc: "Expansión de márgenes supera expectativas. El mercado premia la calidad con un múltiplo de 17.5x.",
-                eps: 9.10,
-                pe: 17.5,
-                prob: "30%",
-                upside: "+35% Upside",
-                upsideColor: "text-ui-success",
-                bg: "bg-ui-success/10"
+        function updateDate() {
+            const dateElement = document.getElementById('current-date');
+            if (dateElement) {
+                const now = new Date();
+                const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+                const dateString = now.toLocaleDateString('es-ES', options);
+                dateElement.textContent = dateString.charAt(0).toUpperCase() + dateString.slice(1);
             }
-        };
-
-        const currentPrice = 192.50;
-
-        // --- 2. CHART INITIALIZATION ---
-        document.addEventListener('DOMContentLoaded', () => {
-            initGrowthChart();
-            initMixChart();
-            initFCFChart();
-            
-            // Set initial scenario active state
-            document.getElementById('btn-base').click();
-        });
-
-        // Revenue & EBITDA Chart
-        function initGrowthChart() {
-            const ctx = document.getElementById('growthChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'bar',
-                data: {
-                    labels: financialsData.years,
-                    datasets: [
-                        {
-                            label: 'Ingresos ($B)',
-                            data: financialsData.revenue,
-                            backgroundColor: '#DCC3A3',
-                            borderRadius: 4,
-                            order: 2
-                        },
-                        {
-                            label: 'EBITDA ($B)',
-                            data: financialsData.ebitda,
-                            backgroundColor: '#5C4B37',
-                            type: 'line',
-                            borderColor: '#5C4B37',
-                            borderWidth: 2,
-                            tension: 0.3,
-                            pointBackgroundColor: '#fff',
-                            pointBorderWidth: 2,
-                            pointRadius: 4,
-                            order: 1
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { beginAtZero: true, grid: { display: false } },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
         }
 
-        // Revenue Mix Doughnut
-        function initMixChart() {
-            const ctx = document.getElementById('revenueMixChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'doughnut',
-                data: {
-                    labels: revenueMixData.labels,
-                    datasets: [{
-                        data: revenueMixData.data,
-                        backgroundColor: revenueMixData.colors,
-                        borderWidth: 0,
-                        hoverOffset: 10
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    cutout: '70%',
-                    plugins: {
-                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 10 } } }
-                    }
-                }
-            });
-        }
-
-        // FCF & Debt Chart
-        function initFCFChart() {
-            const ctx = document.getElementById('fcfChart').getContext('2d');
-            new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: financialsData.years,
-                    datasets: [
-                        {
-                            label: 'Free Cash Flow ($B)',
-                            data: financialsData.fcf,
-                            borderColor: '#4F772D', // Green for cash
-                            backgroundColor: 'rgba(79, 119, 45, 0.1)',
-                            fill: true,
-                            tension: 0.4
-                        },
-                        {
-                            label: 'Deuda Neta ($B)',
-                            data: financialsData.debt,
-                            borderColor: '#9A3A3A', // Red for debt
-                            borderDash: [5, 5],
-                            tension: 0.4
-                        }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: {
-                        legend: { position: 'bottom' },
-                        tooltip: { mode: 'index', intersect: false }
-                    },
-                    scales: {
-                        y: { display: true },
-                        x: { grid: { display: false } }
-                    }
-                }
-            });
-        }
-
-        // --- 3. SCENARIO CALCULATOR LOGIC ---
-        function updateScenario(type) {
-            const data = scenarios[type];
-            const target = (data.eps * data.pe).toFixed(2);
-            
-            // Update UI Styling for Buttons
-            ['bear', 'base', 'bull'].forEach(key => {
-                const btn = document.getElementById(`btn-${key}`);
-                if (key === type) {
-                    btn.classList.remove('opacity-60', 'border-brand-200', 'hover:bg-white');
-                    btn.classList.add('border-2', 'border-brand-500', 'bg-white', 'shadow-md');
-                } else {
-                    btn.classList.add('opacity-60', 'border-brand-200', 'hover:bg-white');
-                    btn.classList.remove('border-2', 'border-brand-500', 'bg-white', 'shadow-md');
-                }
-            });
-
-            // Update Text Content with animation effect
-            animateValue("target-price", document.getElementById("target-price").innerText.replace('$', ''), target, 500);
-            
-            document.getElementById('scenario-description').innerText = data.desc;
-            document.getElementById('eps-val').innerText = `$${data.eps.toFixed(2)}`;
-            document.getElementById('pe-val').innerText = `${data.pe}x`;
-            document.getElementById('prob-val').innerText = data.prob;
-
-            const upsideEl = document.getElementById('upside-label');
-            upsideEl.innerText = data.upside;
-            upsideEl.className = `mt-4 inline-block px-4 py-2 rounded-full font-bold text-lg transition-colors duration-300 ${data.upsideColor} ${data.bg}`;
-        }
-
-        // Simple number animation utility
-        function animateValue(id, start, end, duration) {
-            const obj = document.getElementById(id);
-            let startTimestamp = null;
-            const step = (timestamp) => {
-                if (!startTimestamp) startTimestamp = timestamp;
-                const progress = Math.min((timestamp - startTimestamp) / duration, 1);
-                const val = (parseFloat(start) + progress * (parseFloat(end) - parseFloat(start))).toFixed(2);
-                obj.innerHTML = `$${val}`;
-                if (progress < 1) {
-                    window.requestAnimationFrame(step);
-                }
-            };
-            window.requestAnimationFrame(step);
-        }
-
+        window.onload = updateDate;
     </script>
+
 </body>
 </html>
